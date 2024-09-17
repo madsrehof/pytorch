@@ -32,8 +32,8 @@ A ``UserRRef`` will be created when it is used as an argument or return value in
 :meth:`~torch.distributed.rpc.rpc_async` or
 :meth:`~torch.distributed.rpc.remote` invocation, and the owner will be notified
 according to update the reference count. An ``OwnerRRef`` and its data will be
-deleted when there is no ``UserRRef`` instances globally and there are no
-reference to the ``OwnerRRef`` on the owner as well.
+deleted when there are no ``UserRRef`` instances globally and there are no
+references to the ``OwnerRRef``.
 
 
 Assumptions
@@ -41,7 +41,7 @@ Assumptions
 
 RRef protocol is designed with the following assumptions.
 
-- **Transient Network Failures**: The RRef design handles transient
+- **Transient Network Failures**: The RRef protocol handles transient
   network failures by retrying messages. It cannot handle node crashes or
   permanent network partitions. When those incidents occur, the application
   should take down all workers, revert to the previous checkpoint, and resume
@@ -51,7 +51,7 @@ RRef protocol is designed with the following assumptions.
   :meth:`~torch.distributed.rpc.rpc_async` or
   :meth:`~torch.distributed.rpc.remote` are not idempotent and therefore
   cannot be retried. However, internal RRef control messages are idempotent and
-  retried upon message failure.
+  retried upon message failures.
 - **Out of Order Message Delivery**: We do not assume message delivery order
   between any pair of nodes, because both sender and receiver are using multiple
   threads. There is no guarantee on which message will be processed first.
@@ -84,7 +84,7 @@ case a new ``UserRRef`` will be created on the user. As the owner is the caller,
 it can easily update its local reference count on the ``OwnerRRef``.
 
 The only requirement is that any
-``UserRRef`` must notify the owner upon destruction. Hence, we need the first
+``UserRRef`` must notify the owner upon destruction. Therefore, we need the first
 guarantee:
 
 **G1. The owner will be notified when any UserRRef is deleted.**
@@ -163,7 +163,7 @@ Implementation
 --------------
 
 **G1** is implemented by sending out a delete message in ``UserRRef``
-destructor. To provide **G2**, the parent ``UserRRef`` is put into a context
+destructor. To provide **G2**, the parent ``UserRRef`` is  into a context
 whenever it is forked, indexed by the new ``ForkId``. The parent ``UserRRef`` is
 only removed from the context when it receives an acknowledgement message (ACK)
 from the child, and the child will only send out the ACK when it is confirmed by
